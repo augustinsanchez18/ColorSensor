@@ -26,7 +26,7 @@ public class WheelOfFortune {
     private ColorMatch colorMatch;
 
     private WheelOfFortune() {
-        primary = new WPI_TalonSRX(1);
+        primary = new WPI_TalonSRX(10);
         gameData = DriverStation.getInstance().getGameSpecificMessage();
         colorSensor = new ColorSensorV3(RobotMap.WheelOfFortune.COLOR_SENSOR);
         colorMatch = new ColorMatch();
@@ -127,14 +127,17 @@ public class WheelOfFortune {
      * by the FMS
      */
     public void positionControl() {
-        //TODO: account for offset of the color wheel based on mechanical design
-        ColorMatchResult result = colorMatch.matchColor(getDetectedColor());
-
-        if (!result.color.equals(getPCValue(gameData.charAt(0)))) { //TODO: handle exceptions
-            primary.set(0.1); //TODO: change motor values
-        } else {
-            primary.set(0); //stop the motor when the color is reached
+        try{//TODO: account for offset of the color wheel based on mechanical design
+            ColorMatchResult result = colorMatch.matchColor(getDetectedColor());
+            if (!result.color.equals(getPCValue(gameData.charAt(0)))) { //TODO: handle exceptions
+                primary.set(0.1); //TODO: change motor values
+            } else {
+                primary.set(0); //stop the motor when the color is reached
+            }
+        }catch(NullPointerException e){
+            System.out.println("null");
         }
+        
 
     }
 
