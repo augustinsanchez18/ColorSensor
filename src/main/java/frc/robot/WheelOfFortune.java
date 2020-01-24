@@ -32,6 +32,10 @@ public class WheelOfFortune {
         colorMatch = new ColorMatch();
     }
 
+    public void setSpeed(double speed){
+        primary.set(speed);
+    }
+
     /**
      * Checks to see if the instance of this class has already been created.
      * If so, return it. If not, create it and return it.
@@ -70,6 +74,7 @@ public class WheelOfFortune {
                                                RobotMap.WheelOfFortune.YELLOW_VALUES[1],
                                                RobotMap.WheelOfFortune.YELLOW_VALUES[2]);
         }
+
         return targetColor;
     }
 
@@ -119,7 +124,7 @@ public class WheelOfFortune {
         double green = colorSensor.getColor().green;
         double blue = colorSensor.getColor().blue;
 
-        return ColorMatch.makeColor(red, green, blue); //TODO: evaluate use of this method
+        return ColorMatch.makeColor(0.3, 0.4, 0.4); //TODO: evaluate use of this method
     }
     
     /**
@@ -127,15 +132,17 @@ public class WheelOfFortune {
      * by the FMS
      */
     public void positionControl() {
-        try{//TODO: account for offset of the color wheel based on mechanical design
+        try {//TODO: account for offset of the color wheel based on mechanical design
             ColorMatchResult result = colorMatch.matchColor(getDetectedColor());
             if (!result.color.equals(getPCValue(gameData.charAt(0)))) { //TODO: handle exceptions
-                primary.set(0.1); //TODO: change motor values
+                //primary.set(0.1); //TODO: change motor values
+                System.out.println("not null");
             } else {
                 primary.set(0); //stop the motor when the color is reached
             }
-        }catch(NullPointerException e){
+        } catch(NullPointerException e) {
             System.out.println("null");
+            
         }
         
 
