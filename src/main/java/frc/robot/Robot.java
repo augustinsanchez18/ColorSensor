@@ -43,12 +43,10 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void teleopPeriodic() {    
+  public void teleopPeriodic() {
+    //System.out.println(wheel.setInitialColor());
     if(controller.getAButton()) {
-      wheel.positionControl();
-    }
-    if(controller.getBButton()) {
-      wheel.rotationControl(wheel.getDetectedColor());
+      wheel.rotationControl(wheel.setInitialColor(), 32);
     }
     else {
       wheel.stop();
