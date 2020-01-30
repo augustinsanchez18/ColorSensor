@@ -207,6 +207,7 @@ public class WheelOfFortune {
         return colorDetect();
     }
 
+
     /**
      * makes the wheel spin 4 times for rotation control of the color wheel
      * @param initialColor the result of the setInitialColor() method (the color we start on)
