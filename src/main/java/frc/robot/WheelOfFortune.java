@@ -63,25 +63,46 @@ public class WheelOfFortune {
     }
 
     /**
+     * takes game data sent by the FMS and accordingly returns the Color which we need to target
+     * @param gameData the data sent by the FMS
+     * @return WOFColor enum for the sensor to target
+     */
+    private WOFColor getPCValue(String gameData) {
+        WOFColor colorPassed = WOFColor.NONE;
+
+        if (gameData.equals("B")) {
+            colorPassed = WOFColor.BLUE;
+        } else if (gameData.equals("G")) {
+            colorPassed = WOFColor.GREEN;
+        } else if (gameData.equals("R")) {
+            colorPassed = WOFColor.RED;
+        } else if (gameData.equals("Y")) {
+            colorPassed = WOFColor.YELLOW;
+        }
+
+        return colorPassed;
+    }
+
+    /**
      * Runs color-matching on the currently detected color
      * @return a string representing the current color
      */
-    public String colorDetect() {
+    public WOFColor colorDetect() {
         detectedColor = colorSensor.getColor();
 
-        String ret = "";
+        WOFColor ret = WOFColor.NONE;
 
         ColorMatchResult match = colorMatch.matchColor(detectedColor);
         if (match == null) {
-            ret = "NONE";
+            ret = WOFColor.NONE;
         } else if (match.color == blueTarget) {
-            ret = "BLUE";
+            ret = WOFColor.BLUE;
         } else if (match.color == redTarget) {
-            ret = "RED";
+            ret = WOFColor.RED;
         } else if (match.color == greenTarget) {
-            ret = "GREEN";
+            ret = WOFColor.GREEN;
         } else if (match.color == yellowTarget) {
-            ret = "YELLOW";
+            ret = WOFColor.YELLOW;
         }
 
         return ret;
@@ -91,7 +112,7 @@ public class WheelOfFortune {
      * sets the initial color read by the sensor for position control
      * @return the initial Color
      */
-    public String setInitialColor() {
+    public WOFColor setInitialColor() {
         return colorDetect();
     }
 
@@ -100,22 +121,73 @@ public class WheelOfFortune {
      * makes the wheel spin 4 times for rotation control of the color wheel
      * @param initialColor the result of the setInitialColor() method (the color we start on)
      */
-    public void rotationControl(String initialColor, int numColorChange) {
+    public void rotationControl(WOFColor initialColor, int numColorChange) {
         // read values of color sensor every 20 ms to check if matches original color
         primary.set(0.2);
         int colorChangeCount = 0;
 
-        String previousColor = initialColor;
+        WOFColor previousColor = initialColor;
 
         while (colorChangeCount < numColorChange) {
-            String currentColor = colorDetect();
-            if (!previousColor.equals(currentColor) && !currentColor.equals("NONE")) {
+            WOFColor currentColor = colorDetect();
+            if (!(previousColor == currentColor) && !(currentColor == WOFColor.NONE)) {
                 colorChangeCount++;
                 previousColor = currentColor;
             }
         }
         
         primary.set(0);
+    }
+
+    /**
+     * makes the wheel spin to the color from the Smart Dashboard
+     */
+    public void spin2Win() {
+        WOFColor aimColor = getPCValue(setTargetColor());
+        WOFColor detectedColor = colorDetect();
+
+        try {
+            switch (aimColor) {
+                case RED:
+                    while (!(detectedColor == WOFColor.BLUE)) {
+                        detectedColor = colorDetect();
+                        setSpeed(0.2);
+                    }     
+                    stop();
+                    break;
+                case BLUE:
+                    while (!(detectedColor == WOFColor.RED)) {
+                        detectedColor = colorDetect();
+                        setSpeed(0.2);
+                    }
+                    stop();
+                    break;
+                case GREEN:
+                    while (!(detectedColor == WOFColor.YELLOW)) {
+                        detectedColor = colorDetect();
+                        setSpeed(0.2);
+                    }
+                    stop();
+                    break;
+                case YELLOW:
+                    while (!(detectedColor == WOFColor.GREEN)) {
+                        detectedColor = colorDetect();
+                        setSpeed(0.2);
+                    }
+                    stop();
+                    break;
+                case NONE:
+                    System.out.println("NONE");
+                    break;
+                default:
+                    System.out.println("DEFAULT");
+                    break;
+            }
+        } catch (NullPointerException e) {
+            System.out.println("Null");
+        }
+        
+                
     }
 
     /**
@@ -135,6 +207,12 @@ public class WheelOfFortune {
      */
     public void stop() {
         primary.set(0);
+    }
+
+    public static String setTargetColor(){
+        String targetColor =  SmartDashboard.getString("Color", "B");
+        SmartDashboard.putString("Color", targetColor);
+        return targetColor;
     }
 
     /**
